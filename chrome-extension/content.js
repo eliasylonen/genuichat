@@ -1,4 +1,58 @@
+const chatGptProvider = {
+  waitUntilChatHistoryIsLoaded: async () => new Promise((resolve) => {  
+    const onMutation = (event) => {
+      const isLoaded = !!document.querySelector('main article');
+      if (!isLoaded) return;
+      mutationObserver.disconnect();
+      resolve();
+    };
+
+    const mutationObserver = new MutationObserver(onMutation);
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
+  }),
+  addOnNewLatestResponseSeenListener: (onNewLatestResponseSeenListener) => {
+    let completedMessageIds = new Set();
+
+    const getUniqueAcrossChatsLastMessageId = () => {
+      const messageId = document.querySelector('main article:last-of-type').getAttribute('data-testid');
+      const chatId = window.location.pathname.match(/\/c\/([0-9a-f-]+)/)?.[1];
+      return `chat-${chatId}-message-${messageId}`;
+    };
+
+    const onMutation = (event) => {
+      const isLastChatGptResponseCompleted = !!document.querySelector('main article:last-of-type [data-testid="copy-turn-action-button"]');
+      if (!isLastChatGptResponseCompleted) return;
+      const completedMessageId = getUniqueAcrossChatsLastMessageId();
+      if (completedMessageIds.has(completedMessageId)) return;
+      console.log('Completed message id', completedMessageId);
+      completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
+      onNewLatestResponseSeenListener();
+    };
+  
+    const mutationObserver = new MutationObserver(onMutation);
+
+    const articleElement = document.querySelector('main article');
+    const articlesContainer = articleElement?.parentElement;
+
+    if (!articlesContainer) throw new Error('No articles container found');
+
+    mutationObserver.observe(articlesContainer, { childList: true, subtree: true });
+  },
+}
+
+// TODO: Pass globals as arguments throughout the whole app
 const iframe = document.createElement('iframe');
+
+const chatProvider = (() => {
+  switch (window.location.hostname) {
+    case 'chatgpt.com':
+      return chatGptProvider;
+    default:
+      throw new Error('Unsupported chat provider');
+  }
+})();
+
+const getApiKey = () => localStorage.getItem('openai-api-key');
 
 const setupLayout = () => {
   const genuiContainer = document.createElement('div');
@@ -71,45 +125,13 @@ const loadHtml = async (html) => {
   iframe.contentDocument.close();
 };
 
-const onResponseCompleted = async () => {
+const onNewLatestResponseSeenListener = async () => {
   const html = await generateHtmlOnChatResponse();
   await loadHtml(html);
 };
 
-const chatgptIntegration = {
-  addResponseCompletedListener: (onResponseCompleted) => {
-    let completedMessageIds = new Set();
-
-    const getUniqueAcrossChatsLastMessageId = () => {
-      const messageId = document.querySelector('main article:last-of-type').getAttribute('data-testid');
-      const chatId = window.location.pathname.match(/\/c\/([0-9a-f-]+)/)?.[1];
-      return `chat-${chatId}-message-${messageId}`;
-    };
-
-    const onMutation = (event) => {
-      const isLastChatGptResponseCompleted = !!document.querySelector('main article:last-of-type [data-testid="copy-turn-action-button"]');
-      console.log('Mutation', event, 'isLastChatGptResponseCompleted', isLastChatGptResponseCompleted);
-      if (!isLastChatGptResponseCompleted) return;
-      const completedMessageId = getUniqueAcrossChatsLastMessageId();
-      if (completedMessageIds.has(completedMessageId)) return;
-      console.log('Completed message id', completedMessageId);
-      completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
-      onResponseCompleted();
-    };
-  
-    const observer = new MutationObserver(onMutation);
-
-    const articleElement = document.querySelector('main article');
-    const articlesContainer = articleElement?.parentElement;
-
-    if (!articlesContainer) throw new Error('No articles container found');
-
-    observer.observe(articlesContainer, { childList: true, subtree: true });
-  },
-}
-
 const addResponseCompletedListener = () => {
-  chatgptIntegration.addResponseCompletedListener(onResponseCompleted);
+  chatProvider.addOnNewLatestResponseSeenListener(onNewLatestResponseSeenListener);
 };
 
 const handleIframeButtonClick = async (event) => {
@@ -123,16 +145,21 @@ const handleMessage = (event) => {
   }
 }
 
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const waitUntilChatHistoryIsLoaded = async () => {
+  console.log('Waiting until chat history is loaded');
+  await chatProvider.waitUntilChatHistoryIsLoaded();
+  console.log('Chat history loaded');
+}
 
 const initGenUIChat = async () => {
   console.log('Initializing GenUIChat');
   
   setupLayout();
+
+  await waitUntilChatHistoryIsLoaded();
+
   const html = await generateHtmlOnChatResponse();
   await loadHtml(html);
-
-  await wait(5000);
   addResponseCompletedListener();
   window.addEventListener('message', handleMessage);
   console.log('GenUIChat initialized');
