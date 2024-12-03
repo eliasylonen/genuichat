@@ -1,7 +1,7 @@
 const chatGptProvider = {
   waitUntilChatHistoryIsLoaded: async () => new Promise((resolve) => {  
     const onMutation = (event) => {
-      const isLoaded = !!document.querySelector('main article');
+      const isLoaded = !!document.querySelector('main article:last-of-type div[data-message-author-role="assistant"] > div > div');
       if (!isLoaded) return;
       mutationObserver.disconnect();
       resolve();
@@ -38,6 +38,11 @@ const chatGptProvider = {
 
     mutationObserver.observe(articlesContainer, { childList: true, subtree: true });
   },
+  getLastMessageHTML: () => {
+    const lastMessageElement = document.querySelector('main article:last-of-type div[data-message-author-role="assistant"] > div > div')
+    if (!lastMessageElement) throw new Error('Last message not found');
+    return lastMessageElement?.innerHTML;
+  },
 }
 
 // TODO: Pass globals as arguments throughout the whole app
@@ -52,7 +57,11 @@ const chatProvider = (() => {
   }
 })();
 
-const getApiKey = () => localStorage.getItem('openai-api-key');
+const getOpenAiApiKey = () => {
+  const openAiApiKey = localStorage.getItem('genuichat-openai-api-key');
+  if (!openAiApiKey) throw new Error('Missing OpenAI API key');
+  return openAiApiKey;
+};
 
 const setupLayout = () => {
   const genuiContainer = document.createElement('div');
@@ -89,12 +98,67 @@ const getPlaceholderHtml = () => `
   </html>
 `;
 
+const generateChatCompletion = async (prompt) => {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${getOpenAiApiKey()}`
+  },
+  body: JSON.stringify({
+    model: 'gpt-4o-mini',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.7,
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+  }
+  
+  const { choices } = await response.json();
+  const { content } = choices[0].message;
+
+  return content;
+};
+
 const generateHtmlOnChatResponse = async () => {
-  const prompt = `Generate HTML (including CSS) that displays relevant information from the last message on an HTML page. Use tables, charts, and other visual elements if relevant to make data easy to understand. Add useful buttons depending on the context. All buttons must have unique ids.`;
+  console.log('Generating HTML from last chat response');
 
-  // TODO: Call OpenAI API
+  const relevantInformationMarkdown = await generateChatCompletion(`Extract relevant information from the following HTML.
+Shorten the text, keep tables and other data original.
+Respond in Markdown.
 
-  return getPlaceholderHtml();
+HTML:
+
+${chatProvider.getLastMessageHTML()}`);
+  console.log('Extracted the following relevant information from last chat response', relevantInformationMarkdown);
+
+  const rawGeneratedHtml = await generateChatCompletion(`Generate HTML (including CSS) that displays relevant information in the Message on an HTML page.
+Use tables, charts, and other visual elements if relevant to make data easy to understand.
+Add useful buttons depending on the context.
+All buttons must have unique ids. 
+
+Reply only with HTML, nothing else.
+
+Message:
+
+${relevantInformationMarkdown}`);
+console.log('Generated HTML', rawGeneratedHtml);
+
+  const rawImprovedHtml = await generateChatCompletion(`Add helpful buttons to the following HTML.
+All buttons must have unique ids.
+
+Reply only with HTML, nothing else.
+
+HTML:
+
+${rawGeneratedHtml}`);
+console.log('Improved HTML', rawImprovedHtml);
+
+const improvedHtml = rawImprovedHtml.replace(/^```html\n|```$/g, '');
+
+  return improvedHtml;
 };
 
 const generateHtmlOnButtonClick = async (buttonId, buttonText, dom) => {
@@ -148,13 +212,13 @@ const handleMessage = (event) => {
 const waitUntilChatHistoryIsLoaded = async () => {
   console.log('Waiting until chat history is loaded');
   await chatProvider.waitUntilChatHistoryIsLoaded();
-  console.log('Chat history loaded');
+  console.log('Chat history loaded', document.querySelector('main article:last-of-type div[data-message-author-role="assistant"] > div > div'));
 }
 
-const requestApiKeyFromUser = async () => {
+const requestOpenAiApiKeyFromUser = async () => {
   const apiKey = prompt('Please enter your OpenAI API key to use GenUIChat:');
   if (apiKey) {
-    localStorage.setItem('openai-api-key', apiKey);
+    localStorage.setItem('genuichat-openai-api-key', apiKey);
   } else {
     alert('API key is required for GenUIChat to function');
   }
@@ -165,7 +229,11 @@ const initGenUIChat = async () => {
   
   setupLayout();
 
-  if (!getApiKey()) await requestApiKeyFromUser();
+  try {
+    getOpenAiApiKey();
+  } catch (error) {
+    await requestOpenAiApiKeyFromUser();
+  }
 
   await waitUntilChatHistoryIsLoaded();
 
