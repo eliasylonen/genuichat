@@ -63,12 +63,22 @@ const getOpenAiApiKey = () => {
   return openAiApiKey;
 };
 
+const statusBar = document.createElement('div');
+
+const setLoadingIndicator = (isLoading) => {
+  statusBar.textContent = isLoading ? 'Loading...' : 'Ready';
+};
+
 const setupLayout = () => {
   const genuiContainer = document.createElement('div');
   genuiContainer.className = 'genui-container';
   iframe.className = 'genui-iframe';
 
+  statusBar.className = 'genui-status-bar';
+  setLoadingIndicator(true);
+
   genuiContainer.appendChild(iframe);
+  genuiContainer.appendChild(statusBar);
   document.body.appendChild(genuiContainer);
 
   const rootDivs = document.body.querySelectorAll('body > div');
@@ -76,7 +86,7 @@ const setupLayout = () => {
     div.style.maxWidth = '50%';
   });
 
-  return iframe;
+  return { iframe, statusBar };
 };
 
 const getPlaceholderHtml = () => `
@@ -132,7 +142,7 @@ Respond in Markdown.
 HTML:
 
 ${chatProvider.getLastMessageHTML()}`);
-  console.log('Extracted the following relevant information from last chat response', relevantInformationMarkdown);
+    console.log('Extracted the following relevant information from last chat response', relevantInformationMarkdown);
 
   const rawGeneratedHtml = await generateChatCompletion(`Generate HTML (no CSS) that displays relevant information in the Message on an HTML page.
 Use tables, charts, and other visual elements if relevant to make data easy to understand.
@@ -144,7 +154,7 @@ Reply only with HTML, nothing else.
 Message:
 
 ${relevantInformationMarkdown}`);
-console.log('Generated HTML', rawGeneratedHtml);
+    console.log('Generated HTML', rawGeneratedHtml);
 
   const rawImprovedHtml = await generateChatCompletion(`Add buttons for manipulating the page itself to relevant parts of the page.
 Do not implement button click handlers.
@@ -156,17 +166,17 @@ Reply only with HTML, nothing else.
 HTML:
 
 ${rawGeneratedHtml}`);
-console.log('Improved HTML', rawImprovedHtml);
+    console.log('Improved HTML', rawImprovedHtml);
 
-const improvedHtml = rawImprovedHtml.replace(/^```html\n|```$/g, '');
+  const improvedHtml = rawImprovedHtml.replace(/^```html\n|```$/g, '');
 
   return improvedHtml;
 };
 
 const generateHtmlOnButtonClick = async (buttonId, buttonText, dom) => {
-  const prompt = `The user clicked the "${buttonText}" with id "${buttonId}" in the following DOM: \n\n###\n\n${dom}.\n\n###\n\nGenerate HTML (including CSS) reflecting necessary changes to of the last message on an HTML page.`;
+    const prompt = `The user clicked the "${buttonText}" with id "${buttonId}" in the following DOM: \n\n###\n\n${dom}.\n\n###\n\nGenerate HTML (including CSS) reflecting necessary changes to of the last message on an HTML page.`;
 
-  // TODO: Call OpenAI API
+    // TODO: Call OpenAI API
 
   return getPlaceholderHtml();
 };
@@ -229,7 +239,7 @@ const requestOpenAiApiKeyFromUser = async () => {
 const initGenUIChat = async () => {
   console.log('Initializing GenUIChat');
   
-  setupLayout();
+  const { iframe, statusBar } = setupLayout();
 
   try {
     getOpenAiApiKey();
@@ -244,6 +254,7 @@ const initGenUIChat = async () => {
   addResponseCompletedListener();
   window.addEventListener('message', handleMessage);
   console.log('GenUIChat initialized');
+  setLoadingIndicator(false);
 };
 
 window.addEventListener('load', () => initGenUIChat());
