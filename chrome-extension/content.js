@@ -125,8 +125,8 @@ const generateChatCompletion = async (prompt) => {
 const generateHtmlOnChatResponse = async () => {
   console.log('Generating HTML from last chat response');
 
-  const relevantInformationMarkdown = await generateChatCompletion(`Extract relevant information from the following HTML.
-Shorten the text, keep tables and other data original.
+  const relevantInformationMarkdown = await generateChatCompletion(`Extract most relevant information from the following HTML.
+Shorten the text significantly, but keep tables and other data original.
 Respond in Markdown.
 
 HTML:
@@ -134,7 +134,7 @@ HTML:
 ${chatProvider.getLastMessageHTML()}`);
   console.log('Extracted the following relevant information from last chat response', relevantInformationMarkdown);
 
-  const rawGeneratedHtml = await generateChatCompletion(`Generate HTML (including CSS) that displays relevant information in the Message on an HTML page.
+  const rawGeneratedHtml = await generateChatCompletion(`Generate HTML (no CSS) that displays relevant information in the Message on an HTML page.
 Use tables, charts, and other visual elements if relevant to make data easy to understand.
 Add useful buttons depending on the context.
 All buttons must have unique ids. 
@@ -146,7 +146,9 @@ Message:
 ${relevantInformationMarkdown}`);
 console.log('Generated HTML', rawGeneratedHtml);
 
-  const rawImprovedHtml = await generateChatCompletion(`Add helpful buttons to the following HTML.
+  const rawImprovedHtml = await generateChatCompletion(`Add buttons for manipulating the page itself to relevant parts of the page.
+Do not implement button click handlers.
+Respond with the updated HTML and nothing else.
 All buttons must have unique ids.
 
 Reply only with HTML, nothing else.
