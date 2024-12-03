@@ -45,9 +45,6 @@ const chatGptProvider = {
   },
 }
 
-// TODO: Pass globals as arguments throughout the whole app
-const iframe = document.createElement('iframe');
-
 const chatProvider = (() => {
   switch (window.location.hostname) {
     case 'chatgpt.com':
@@ -63,19 +60,20 @@ const getOpenAiApiKey = () => {
   return openAiApiKey;
 };
 
-const statusBar = document.createElement('div');
-
-const setLoadingIndicator = (isLoading) => {
+const setLoadingIndicator = (statusBar, isLoading) => {
   statusBar.textContent = isLoading ? 'Loading...' : 'Ready';
 };
 
 const setupLayout = () => {
   const genuiContainer = document.createElement('div');
   genuiContainer.className = 'genui-container';
+  
+  const iframe = document.createElement('iframe');
   iframe.className = 'genui-iframe';
 
+  const statusBar = document.createElement('div');
   statusBar.className = 'genui-status-bar';
-  setLoadingIndicator(true);
+  setLoadingIndicator(statusBar, true);
 
   genuiContainer.appendChild(iframe);
   genuiContainer.appendChild(statusBar);
@@ -156,7 +154,7 @@ Message:
 ${relevantInformationMarkdown}`);
     console.log('Generated HTML', rawGeneratedHtml);
 
-  const rawImprovedHtml = await generateChatCompletion(`Add buttons for manipulating the page itself to relevant parts of the page.
+  const rawImprovedHtml = await generateChatCompletion(`Add helpful buttons relevant parts of the page itself.
 Do not implement button click handlers.
 Respond with the updated HTML and nothing else.
 All buttons must have unique ids.
@@ -181,7 +179,7 @@ const generateHtmlOnButtonClick = async (buttonId, buttonText, dom) => {
   return getPlaceholderHtml();
 };
 
-const loadHtml = async (html) => {
+const loadHtml = async (iframe, html) => {
   iframe.onload = () => {
     const buttons = iframe.contentDocument.querySelectorAll('button');
     buttons.forEach(button => {
@@ -201,23 +199,23 @@ const loadHtml = async (html) => {
   iframe.contentDocument.close();
 };
 
-const onNewLatestResponseSeenListener = async () => {
+const onNewLatestResponseSeenListener = (iframe) => async () => {
   const html = await generateHtmlOnChatResponse();
-  await loadHtml(html);
+  await loadHtml(iframe, html);
 };
 
-const addResponseCompletedListener = () => {
-  chatProvider.addOnNewLatestResponseSeenListener(onNewLatestResponseSeenListener);
+const addResponseCompletedListener = (iframe) => {
+  chatProvider.addOnNewLatestResponseSeenListener(onNewLatestResponseSeenListener(iframe));
 };
 
-const handleIframeButtonClick = async (event) => {
+const handleIframeButtonClick = (iframe) => async (event) => {
   const html = await generateHtmlOnButtonClick(event.data.buttonId, event.data.buttonText, event.data.dom);
-  await loadHtml(html);
+  await loadHtml(iframe, html);
 };
 
-const handleMessage = (event) => {
+const handleMessage = (iframe) => (event) => {
   if (event.data.type === 'button-click') {
-    handleIframeButtonClick(event);
+    handleIframeButtonClick(iframe)(event);
   }
 }
 
@@ -238,7 +236,7 @@ const requestOpenAiApiKeyFromUser = async () => {
 
 const initGenUIChat = async () => {
   console.log('Initializing GenUIChat');
-  
+
   const { iframe, statusBar } = setupLayout();
 
   try {
@@ -250,11 +248,11 @@ const initGenUIChat = async () => {
   await waitUntilChatHistoryIsLoaded();
 
   const html = await generateHtmlOnChatResponse();
-  await loadHtml(html);
-  addResponseCompletedListener();
-  window.addEventListener('message', handleMessage);
+  await loadHtml(iframe, html);
+  addResponseCompletedListener(iframe);
+  window.addEventListener('message', handleMessage(iframe));
   console.log('GenUIChat initialized');
-  setLoadingIndicator(false);
+  setLoadingIndicator(statusBar, false);
 };
 
 window.addEventListener('load', () => initGenUIChat());
