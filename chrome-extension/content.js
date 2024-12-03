@@ -130,7 +130,11 @@ const generateChatCompletion = async (prompt) => {
   return content;
 };
 
-const generateHtmlOnChatResponse = async () => {
+const cleanHtml = (html) => {
+  return html.replace(/^```html\n|```$/g, '');
+};
+
+const generateHtmlOnChatResponse = async (iframe) => {
   console.log('Generating HTML from last chat response');
 
   const relevantInformationMarkdown = await generateChatCompletion(`Extract most relevant information from the following HTML.
@@ -141,6 +145,7 @@ HTML:
 
 ${chatProvider.getLastMessageHTML()}`);
     console.log('Extracted the following relevant information from last chat response', relevantInformationMarkdown);
+  await loadHtml(iframe, relevantInformationMarkdown);
 
   const rawGeneratedHtml = await generateChatCompletion(`Generate HTML (no CSS) that displays relevant information in the Message on an HTML page.
 Use tables, charts, and other visual elements if relevant to make data easy to understand.
@@ -153,6 +158,8 @@ Message:
 
 ${relevantInformationMarkdown}`);
     console.log('Generated HTML', rawGeneratedHtml);
+  const generatedHtml = cleanHtml(rawGeneratedHtml);
+  await loadHtml(iframe, generatedHtml);
 
   const rawImprovedHtml = await generateChatCompletion(`Add helpful buttons relevant parts of the page itself.
 Do not implement button click handlers.
@@ -166,9 +173,9 @@ HTML:
 ${rawGeneratedHtml}`);
     console.log('Improved HTML', rawImprovedHtml);
 
-  const improvedHtml = rawImprovedHtml.replace(/^```html\n|```$/g, '');
+  const improvedHtml = cleanHtml(rawImprovedHtml);
 
-  return improvedHtml;
+  await loadHtml(iframe, improvedHtml);
 };
 
 const generateHtmlOnButtonClick = async (buttonId, buttonText, dom) => {
@@ -200,8 +207,7 @@ const loadHtml = async (iframe, html) => {
 };
 
 const onNewLatestResponseSeenListener = (iframe) => async () => {
-  const html = await generateHtmlOnChatResponse();
-  await loadHtml(iframe, html);
+  await generateHtmlOnChatResponse(iframe);
 };
 
 const addResponseCompletedListener = (iframe) => {
@@ -247,8 +253,7 @@ const initGenUIChat = async () => {
 
   await waitUntilChatHistoryIsLoaded();
 
-  const html = await generateHtmlOnChatResponse();
-  await loadHtml(iframe, html);
+  await generateHtmlOnChatResponse(iframe);
   addResponseCompletedListener(iframe);
   window.addEventListener('message', handleMessage(iframe));
   console.log('GenUIChat initialized');
