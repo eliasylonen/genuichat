@@ -71,18 +71,45 @@ const loadHtml = async (html) => {
   iframe.contentDocument.close();
 };
 
-// TODO: Only call onResponseCompleted when a new response from ChatGPT is completed
-const setupResponseCompletedObserver = (onResponseCompleted) => {
-  const observer = new MutationObserver(onResponseCompleted);
+const onResponseCompleted = async () => {
+  const html = await generateHtmlOnChatResponse();
+  await loadHtml(html);
+};
 
-  const conversationContainer = document.querySelector('[data-testid="conversation-turn-stream"]');
+const chatgptIntegration = {
+  addResponseCompletedListener: (onResponseCompleted) => {
+    let completedMessageIds = new Set();
 
-  if (conversationContainer) {
-    observer.observe(conversationContainer, {
-      childList: true,
-      subtree: true
-    });
-  }
+    const getUniqueAcrossChatsLastMessageId = () => {
+      const messageId = document.querySelector('main article:last-of-type').getAttribute('data-testid');
+      const chatId = window.location.pathname.match(/\/c\/([0-9a-f-]+)/)?.[1];
+      return `chat-${chatId}-message-${messageId}`;
+    };
+
+    const onMutation = (event) => {
+      const isLastChatGptResponseCompleted = !!document.querySelector('main article:last-of-type [data-testid="copy-turn-action-button"]');
+      console.log('Mutation', event, 'isLastChatGptResponseCompleted', isLastChatGptResponseCompleted);
+      if (!isLastChatGptResponseCompleted) return;
+      const completedMessageId = getUniqueAcrossChatsLastMessageId();
+      if (completedMessageIds.has(completedMessageId)) return;
+      console.log('Completed message id', completedMessageId);
+      completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
+      onResponseCompleted();
+    };
+  
+    const observer = new MutationObserver(onMutation);
+
+    const articleElement = document.querySelector('main article');
+    const articlesContainer = articleElement?.parentElement;
+
+    if (!articlesContainer) throw new Error('No articles container found');
+
+    observer.observe(articlesContainer, { childList: true, subtree: true });
+  },
+}
+
+const addResponseCompletedListener = () => {
+  chatgptIntegration.addResponseCompletedListener(onResponseCompleted);
 };
 
 const handleIframeButtonClick = async (event) => {
@@ -96,6 +123,8 @@ const handleMessage = (event) => {
   }
 }
 
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const initGenUIChat = async () => {
   console.log('Initializing GenUIChat');
   
@@ -103,7 +132,8 @@ const initGenUIChat = async () => {
   const html = await generateHtmlOnChatResponse();
   await loadHtml(html);
 
-  // setupMessageObserver(generateUI);
+  await wait(5000);
+  addResponseCompletedListener();
   window.addEventListener('message', handleMessage);
   console.log('GenUIChat initialized');
 };
