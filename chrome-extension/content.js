@@ -151,10 +151,21 @@ const waitUntilChatHistoryIsLoaded = async () => {
   console.log('Chat history loaded');
 }
 
+const requestApiKeyFromUser = async () => {
+  const apiKey = prompt('Please enter your OpenAI API key to use GenUIChat:');
+  if (apiKey) {
+    localStorage.setItem('openai-api-key', apiKey);
+  } else {
+    alert('API key is required for GenUIChat to function');
+  }
+};
+
 const initGenUIChat = async () => {
   console.log('Initializing GenUIChat');
   
   setupLayout();
+
+  if (!getApiKey()) await requestApiKeyFromUser();
 
   await waitUntilChatHistoryIsLoaded();
 
