@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "GenUIChat",
+  "version": "1.0",
+  "description": "Experimental Generative UI for ChatGPT",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ]
+}
