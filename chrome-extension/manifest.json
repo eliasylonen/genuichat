@@ -26,6 +26,7 @@
       "utils/cleanHtml.js",
       "generateChatCompletion.js",
       "generateHtmlOnChatResponse.js",
+      "generateHtmlOnButtonClick.js",
       "getOpenAiApiKey.js",
       "loadHtml.js",
       "main.js",
