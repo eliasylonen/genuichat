@@ -1,24 +1,27 @@
 # GenUIChat - Experimental Generative UI for ChatGPT
 
-A Chrome extension that creates an interactive, generative UI based on ChatGPT conversations. The extension splits the ChatGPT interface into two parts:
+A Chrome extension that adds an interactive generative UI to ChatGPT.
+
+The extension splits ChatGPT interface into two parts:
 - Left: Original ChatGPT interface
 - Right: Dynamic, context-aware UI generated from the conversation
 
-## Features
-- Automatically generates UI components based on chat messages
-- Responsive layout with split-screen view
-- Interactive buttons with AI-powered responses
+## Current Features
+- UI regeneration using AI on button clicks
+
+## Roadmap
+- TODO
 
 ## Todo
-
-- Request OpenAI API key from user if it's not set
-- Implement calls to ChatGPT's API for generating UI
-- Add loading states
+- Max one in-flight generation process at a time
+- Improve UI generation steps, especially the first one (planning what to show)
+- Button loading state
+- Generate select boxes and other input elements
+- Improve OpenAI API key requesting UI
+- UI regeneration on new messages
 
 ## Testing
-
-1. Create a new directory and add these files
+1. Download or `git clone` the project
 2. Open Chrome and go to [chrome://extensions](chrome://extensions)
-3. Enable Developer mode
-4. Click "Load unpacked" and select your directory
-5. Visit ChatGPT and the extension activates automatically
+3. Click "Load unpacked" and select chrome-extension directory in the project
+4. Open or start a conversation in ChatGPT and the extension activates automatically
