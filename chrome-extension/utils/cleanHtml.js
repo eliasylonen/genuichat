@@ -1,3 +1,3 @@
 export const cleanHtml = (html) => {
-  return html.replace(/^```html\n|```$/g, '');
+  return html.replace(/^.*```html\n|```.*$/g, '');
 }; 

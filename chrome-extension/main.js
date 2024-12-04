@@ -2,6 +2,7 @@
 import { loadHtml } from './loadHtml.js';
 import { generateChatCompletion } from './generateChatCompletion.js';
 import { generateHtmlOnChatResponse } from './generateHtmlOnChatResponse.js';
+import { getOpenAiApiKey } from './getOpenAiApiKey.js';
 
 console.log('Main script started');
 
@@ -108,7 +109,7 @@ const getPlaceholderHtml = () => `
 `;
 
 const onNewLatestResponseSeenListener = (iframe) => async () => {
-  await generateHtmlOnChatResponse(iframe, chatProvider, getOpenAiApiKey());
+  await generateHtmlOnChatResponse(iframe, chatProvider);
 };
 
 const addResponseCompletedListener = (iframe) => {
@@ -118,7 +119,6 @@ const addResponseCompletedListener = (iframe) => {
 const handleIframeButtonClick = (iframe) => async (event) => {
   const domHtml = iframe.contentDocument.documentElement.outerHTML;
   const html = await generateHtmlOnButtonClick(event.data.buttonId, event.data.buttonText, domHtml);
-  await loadHtml(iframe, html);
 };
 
 const handleMessage = (iframe) => (event) => {
@@ -163,19 +163,16 @@ const initGenUIChat = async () => {
 };
 
 const generateHtmlOnButtonClick = async (buttonId, buttonText, domHtml) => {
-  const prompt = `Generate HTML of the page after "${buttonText}" button click.
-The user clicked button with id "${buttonId}" in the following DOM:
-
-###
-
-${domHtml}`;
-
   try {
-    const response = await generateChatCompletion(prompt);
-    return response;
+    const rawUpdatedHtml = await generateChatCompletion(`Generate HTML of the page after "${buttonText}" button click. Respond only with HTML, nothing else. The user clicked button with id "${buttonId}" in the following DOM.
+
+DOM:
+
+${domHtml}`);
+    const updatedHtml = cleanHtml(rawUpdatedHtml);
+    await loadHtml(iframe, updatedHtml);
   } catch (error) {
     console.error('Error generating HTML:', error);
-    return getPlaceholderHtml();
   }
 };
 
