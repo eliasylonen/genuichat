@@ -1,4 +1,4 @@
-//const { generateHtmlOnChatResponse, generateChatCompletion, loadHtml } = await import(chrome.runtime.getURL('llm-providers/htmlGenerator.js'));
+import { cleanHtml } from './utils/cleanHtml.js';
 import { loadHtml } from './loadHtml.js';
 import { generateChatCompletion } from './generateChatCompletion.js';
 import { generateHtmlOnChatResponse } from './generateHtmlOnChatResponse.js';
@@ -113,14 +113,14 @@ const addResponseCompletedListener = (iframe) => {
   chatProvider.addOnNewLatestResponseSeenListener(onNewLatestResponseSeenListener(iframe));
 };
 
-const handleIframeButtonClick = (iframe) => async (event) => {
+const handleIframeButtonClick = (iframe, statusBar) => async (event) => {
   const domHtml = iframe.contentDocument.documentElement.outerHTML;
-  const html = await generateHtmlOnButtonClick(event.data.buttonId, event.data.buttonText, domHtml);
+  const html = await generateHtmlOnButtonClick(iframe, statusBar, event.data.buttonId, event.data.buttonText, domHtml);
 };
 
-const handleMessage = (iframe) => (event) => {
+const handleMessage = (iframe, statusBar) => (event) => {
   if (event.data.type === 'button-click') {
-    handleIframeButtonClick(iframe)(event);
+    handleIframeButtonClick(iframe, statusBar)(event);
   }
 }
 
@@ -152,21 +152,21 @@ const initGenUIChat = async () => {
   await waitUntilChatHistoryIsLoaded();
   await generateHtmlOnChatResponse(iframe, chatProvider, statusBar);
   addResponseCompletedListener(iframe);
-  window.addEventListener('message', handleMessage(iframe));
+  window.addEventListener('message', handleMessage(iframe, statusBar));
 };
 
-const generateHtmlOnButtonClick = async (buttonId, buttonText, domHtml) => {
-  try {
-    const rawUpdatedHtml = await generateChatCompletion(`Generate HTML of the page after "${buttonText}" button click. Respond only with HTML, nothing else. The user clicked button with id "${buttonId}" in the following DOM.
+const generateHtmlOnButtonClick = async (iframe, statusBar, buttonId, buttonText, domHtml) => {
+  setStatusIndicator(statusBar, 'Generating initial HTML...');
+  const rawUpdatedHtml = await generateChatCompletion(`Generate HTML of the page after "${buttonText}" button click.
+Respond only with HTML, nothing else.
+The user clicked button with id "${buttonId}" in the following DOM.
 
 DOM:
 
 ${domHtml}`);
-    const updatedHtml = cleanHtml(rawUpdatedHtml);
-    await loadHtml(iframe, updatedHtml);
-  } catch (error) {
-    console.error('Error generating HTML:', error);
-  }
+  const updatedHtml = cleanHtml(rawUpdatedHtml);
+  await loadHtml(iframe, updatedHtml);
+  setStatusIndicator(statusBar, 'Ready');
 };
 
 export const main = () => {
