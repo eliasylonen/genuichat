@@ -19,6 +19,7 @@ The extension splits ChatGPT interface into two parts:
 - Generate select boxes and other input elements
 - Improve OpenAI API key requesting UI
 - UI regeneration on new messages
+- Stretchable and hideable side panel with mobile support
 
 ## Testing
 1. Download or `git clone` the project
