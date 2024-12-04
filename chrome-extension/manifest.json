@@ -16,7 +16,19 @@
         "https://chatgpt.com/*"
       ],
       "js": ["content.js"],
-      "css": ["styles.css"]
+      "css": ["styles.css"],
+      "type": "module"
     }
-  ]
+  ],
+  "web_accessible_resources": [{
+    "matches": ["*://*/*"],
+    "resources": [
+      "utils/cleanHtml.js",
+      "generateChatCompletion.js",
+      "generateHtmlOnChatResponse.js",
+      "getOpenAiApiKey.js",
+      "loadHtml.js",
+      "main.js"
+    ]
+  }]
 }
