@@ -1,6 +1,7 @@
 import { cleanHtml } from './utils/cleanHtml.js';
 import { loadHtml } from './loadHtml.js';
 import { generateChatCompletion } from './generateChatCompletion.js';
+import { setStatusIndicator } from './setStatusIndicator.js';
 
 const extractRelevantInformation = async (chatProvider) => {
   console.log('Extracting relevant information from last chat response');
@@ -56,13 +57,21 @@ ${rawHtml}`;
   return improvedHtml;
 }
 
-const generateHtmlOnChatResponse = async (iframe, chatProvider) => {
+const generateHtmlOnChatResponse = async (iframe, chatProvider, statusBar) => {
+  setStatusIndicator(statusBar, 'Extracting relevant information...');
   const relevantInformationMarkdown = await extractRelevantInformation(chatProvider);
+  
   await loadHtml(iframe, relevantInformationMarkdown)
+  
+  setStatusIndicator(statusBar, 'Generating initial HTML...');
   const generatedHtml = await generateInitialHtml(relevantInformationMarkdown);
   await loadHtml(iframe, generatedHtml);
+  
+  setStatusIndicator(statusBar, 'Adding interactive elements...');
   const improvedHtml = await addHelpfulButtons(generatedHtml);
   await loadHtml(iframe, improvedHtml);
+  
+  setStatusIndicator(statusBar, 'Ready');
 };
 
 export { generateHtmlOnChatResponse }; 

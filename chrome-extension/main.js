@@ -3,6 +3,7 @@ import { loadHtml } from './loadHtml.js';
 import { generateChatCompletion } from './generateChatCompletion.js';
 import { generateHtmlOnChatResponse } from './generateHtmlOnChatResponse.js';
 import { getOpenAiApiKey } from './getOpenAiApiKey.js';
+import { setStatusIndicator } from './setStatusIndicator.js';
 
 console.log('Main script started');
 
@@ -62,10 +63,6 @@ const chatProvider = (() => {
   }
 })();
 
-const setLoadingIndicator = (statusBar, isLoading) => {
-  statusBar.textContent = isLoading ? 'Loading...' : 'Ready';
-};
-
 const setupLayout = () => {
   const genuiContainer = document.createElement('div');
   genuiContainer.className = 'genui-container';
@@ -75,7 +72,7 @@ const setupLayout = () => {
 
   const statusBar = document.createElement('div');
   statusBar.className = 'genui-status-bar';
-  setLoadingIndicator(statusBar, true);
+  setStatusIndicator(statusBar, 'Initializing...');
 
   genuiContainer.appendChild(iframe);
   genuiContainer.appendChild(statusBar);
@@ -143,8 +140,6 @@ const requestOpenAiApiKeyFromUser = async () => {
 };
 
 const initGenUIChat = async () => {
-  console.log('Initializing GenUIChat');
-
   const { iframe, statusBar } = setupLayout();
 
   try {
@@ -153,13 +148,11 @@ const initGenUIChat = async () => {
     await requestOpenAiApiKeyFromUser();
   }
 
+  setStatusIndicator(statusBar, 'Waiting for chat history...');
   await waitUntilChatHistoryIsLoaded();
-
-  await generateHtmlOnChatResponse(iframe, chatProvider);
+  await generateHtmlOnChatResponse(iframe, chatProvider, statusBar);
   addResponseCompletedListener(iframe);
   window.addEventListener('message', handleMessage(iframe));
-  console.log('GenUIChat initialized');
-  setLoadingIndicator(statusBar, false);
 };
 
 const generateHtmlOnButtonClick = async (buttonId, buttonText, domHtml) => {

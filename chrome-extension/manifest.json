@@ -28,7 +28,8 @@
       "generateHtmlOnChatResponse.js",
       "getOpenAiApiKey.js",
       "loadHtml.js",
-      "main.js"
+      "main.js",
+      "setStatusIndicator.js"
     ]
   }]
 }
