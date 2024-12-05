@@ -15,11 +15,12 @@ The extension splits ChatGPT interface into two parts:
 - **Stage 2:** Increase speed.
 
 ## Todo
+- Improve API key requesting UI, refactor to support multiple LLM providers
+- Add Groq support
 - Max one in-flight generation process at a time
 - Improve UI generation steps, especially the first one (planning what to show)
 - Button loading state
 - Generate select boxes and other input elements
-- Improve OpenAI API key requesting UI
 - UI regeneration on new messages
 - Stretchable and hideable side panel with mobile support
 
