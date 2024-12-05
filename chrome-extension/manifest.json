@@ -27,7 +27,7 @@
       "generateChatCompletion.js",
       "generateHtmlOnButtonClick.js",
       "generateHtmlOnChatResponse.js",
-      "getOpenAiApiKey.js",
+      "getApiKey.js",
       "loadHtml.js",
       "main.js",
       "setStatusIndicator.js"

@@ -1,5 +1,5 @@
 import { generateHtmlOnChatResponse } from './generateHtmlOnChatResponse.js';
-import { getOpenAiApiKey } from './getOpenAiApiKey.js';
+import { getOpenAiApiKey } from './getApiKey.js';
 import { setStatusIndicator } from './setStatusIndicator.js';
 import { generateHtmlOnButtonClick } from './generateHtmlOnButtonClick.js';
 
@@ -116,23 +116,27 @@ const waitUntilChatHistoryIsLoaded = async () => {
   await chatProvider.waitUntilChatHistoryIsLoaded();
 }
 
-const requestOpenAiApiKeyFromUser = async () => {
-  const apiKey = prompt('Please enter your OpenAI API key to use GenUIChat:');
+const requestApiKey = async (apiKeyName, localStorageKey) => {
+  const apiKey = prompt(`Please enter your ${apiKeyName} API key to use GenUIChat:`);
   if (apiKey) {
-    localStorage.setItem('genuichat-openai-api-key', apiKey);
+    localStorage.setItem(localStorageKey, apiKey);
   } else {
-    alert('API key is required for GenUIChat to function');
+    alert(`${apiKeyName} API key is required for GenUIChat to function`);
+  }
+};
+
+const requestMissingApiKeysFromUser = async () => {
+  try {
+    getOpenAiApiKey();
+  } catch (error) {
+    await requestApiKey('OpenAI', 'genuichat-openai-api-key');
   }
 };
 
 const initGenUIChat = async () => {
   const { genuiContainerElement, iframeElement, statusBarElement, statusBarTextElement } = setupLayout();
 
-  try {
-    getOpenAiApiKey();
-  } catch (error) {
-    await requestOpenAiApiKeyFromUser();
-  }
+  await requestMissingApiKeysFromUser();
 
   setStatusIndicator(statusBarTextElement, 'Waiting for chat history...');
   await waitUntilChatHistoryIsLoaded();

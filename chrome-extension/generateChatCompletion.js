@@ -1,4 +1,4 @@
-import { getOpenAiApiKey } from './getOpenAiApiKey.js';
+import { getOpenAiApiKey } from './getApiKey.js';
 
 export const generateChatCompletion = async (prompt) => {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
