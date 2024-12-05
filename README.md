@@ -7,17 +7,20 @@ The extension splits ChatGPT interface into two parts:
 - Right: Dynamic, context-aware UI generated from the conversation
 
 ## Current Features
-- UI regeneration using AI on button clicks
+- Complete raw HTML + JS + CSS generation for each UI update
+- Button clicks trigger complete UI regeneration
 
 ## Roadmap
-- TODO
+- **Stage 1:** Generate helpful, high-quality UI with slow latency to prove there's value.
+- **Stage 2:** Increase speed.
 
 ## Todo
+- Improve API key requesting UI, refactor to support multiple LLM providers
+- Add Groq support
 - Max one in-flight generation process at a time
 - Improve UI generation steps, especially the first one (planning what to show)
 - Button loading state
 - Generate select boxes and other input elements
-- Improve OpenAI API key requesting UI
 - UI regeneration on new messages
 - Stretchable and hideable side panel with mobile support
 
