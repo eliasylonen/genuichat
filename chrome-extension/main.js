@@ -84,25 +84,6 @@ const setupLayout = () => {
   return { genuiContainerElement, iframeElement, statusBarElement };
 };
 
-const getPlaceholderHtml = () => `
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <p>Ui generated at ${+new Date()}</p>
-        <button id="do-something-button-1">Do something</button>
-      </div>
-    </body>
-  </html>
-`;
-
 const onLatestChatResponseCompletedOrLoaded = (iframeElement) => async () => {
   await generateHtmlOnChatResponse(iframeElement, chatProvider);
 };
