@@ -65,7 +65,7 @@ const setupLayout = () => {
   const genuiContainerElement = document.createElement('div');
   genuiContainerElement.id = 'genui-container';
   
-  const iframeElement = document.createElement('iframeElement');
+  const iframeElement = document.createElement('iframe');
   iframeElement.id = 'genui-iframeElement';
 
   const statusBarElement = document.createElement('div');
