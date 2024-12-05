@@ -17,7 +17,7 @@ const chatGptProvider = {
     const mutationObserver = new MutationObserver(onMutation);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
   }),
-  addOnNewLatestResponseSeenListener: (onNewLatestResponseSeenListener) => {
+  registerOnLatestChatResponseCompletedOrLoaded: (onLatestChatResponseCompletedOrLoaded) => {
     let completedMessageIds = new Set();
 
     const getUniqueAcrossChatsLastMessageId = () => {
@@ -33,7 +33,7 @@ const chatGptProvider = {
       if (completedMessageIds.has(completedMessageId)) return;
       console.log('Completed message id', completedMessageId);
       completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
-      onNewLatestResponseSeenListener();
+      onLatestChatResponseCompletedOrLoaded();
     };
   
     const mutationObserver = new MutationObserver(onMutation);
@@ -103,12 +103,12 @@ const getPlaceholderHtml = () => `
   </html>
 `;
 
-const onNewLatestResponseSeenListener = (iframeElement) => async () => {
+const onLatestChatResponseCompletedOrLoaded = (iframeElement) => async () => {
   await generateHtmlOnChatResponse(iframeElement, chatProvider);
 };
 
-const addResponseCompletedListener = (iframeElement) => {
-  chatProvider.addOnNewLatestResponseSeenListener(onNewLatestResponseSeenListener(iframeElement));
+const registerOnLatestChatResponseCompletedOrLoaded = (iframeElement) => {
+  chatProvider.registerOnLatestChatResponseCompletedOrLoaded(onLatestChatResponseCompletedOrLoaded(iframeElement));
 };
 
 const handleIframeButtonClick = (iframeElement, statusBarElement) => async (event) => {
@@ -149,7 +149,7 @@ const initGenUIChat = async () => {
   setStatusIndicator(statusBarElement, 'Waiting for chat history...');
   await waitUntilChatHistoryIsLoaded();
   await generateHtmlOnChatResponse(iframeElement, chatProvider, statusBarElement);
-  addResponseCompletedListener(iframeElement);
+  registerOnLatestChatResponseCompletedOrLoaded(iframeElement);
   window.addEventListener('message', handleMessage(iframeElement, statusBarElement));
 };
 
