@@ -1,3 +1,3 @@
-export const setStatusIndicator = (statusBar, statusText) => {
-  statusBar.textContent = statusText;
+export const setStatusIndicator = (statusBarElement, statusText) => {
+  statusBarElement.textContent = statusText;
 };

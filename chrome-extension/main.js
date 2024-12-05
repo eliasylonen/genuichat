@@ -65,8 +65,8 @@ const setupLayout = () => {
   const genuiContainerElement = document.createElement('div');
   genuiContainerElement.id = 'genui-container';
   
-  const iframeElement = document.createElement('iframe');
-  iframeElement.id = 'genui-iframe';
+  const iframeElement = document.createElement('iframeElement');
+  iframeElement.id = 'genui-iframeElement';
 
   const statusBarElement = document.createElement('div');
   statusBarElement.id = 'genui-status-bar';
@@ -81,7 +81,7 @@ const setupLayout = () => {
     div.style.maxWidth = '50%';
   });
 
-  return { genuiContainer: genuiContainerElement, iframe: iframeElement, statusBar: statusBarElement };
+  return { genuiContainerElement, iframeElement, statusBarElement };
 };
 
 const getPlaceholderHtml = () => `
@@ -103,22 +103,22 @@ const getPlaceholderHtml = () => `
   </html>
 `;
 
-const onNewLatestResponseSeenListener = (iframe) => async () => {
-  await generateHtmlOnChatResponse(iframe, chatProvider);
+const onNewLatestResponseSeenListener = (iframeElement) => async () => {
+  await generateHtmlOnChatResponse(iframeElement, chatProvider);
 };
 
-const addResponseCompletedListener = (iframe) => {
-  chatProvider.addOnNewLatestResponseSeenListener(onNewLatestResponseSeenListener(iframe));
+const addResponseCompletedListener = (iframeElement) => {
+  chatProvider.addOnNewLatestResponseSeenListener(onNewLatestResponseSeenListener(iframeElement));
 };
 
-const handleIframeButtonClick = (iframe, statusBar) => async (event) => {
-  const domHtml = iframe.contentDocument.documentElement.outerHTML;
-  const html = await generateHtmlOnButtonClick(iframe, statusBar, event.data.buttonId, event.data.buttonText, domHtml);
+const handleIframeButtonClick = (iframeElement, statusBarElement) => async (event) => {
+  const domHtml = iframeElement.contentDocument.documentElement.outerHTML;
+  const html = await generateHtmlOnButtonClick(iframeElement, statusBarElement, event.data.buttonId, event.data.buttonText, domHtml);
 };
 
-const handleMessage = (iframe, statusBar) => (event) => {
+const handleMessage = (iframeElement, statusBarElement) => (event) => {
   if (event.data.type === 'button-click') {
-    handleIframeButtonClick(iframe, statusBar)(event);
+    handleIframeButtonClick(iframeElement, statusBarElement)(event);
   }
 }
 
@@ -138,7 +138,7 @@ const requestOpenAiApiKeyFromUser = async () => {
 };
 
 const initGenUIChat = async () => {
-  const { genuiContainer, iframe, statusBar } = setupLayout();
+  const { genuiContainerElement, iframeElement, statusBarElement } = setupLayout();
 
   try {
     getOpenAiApiKey();
@@ -146,11 +146,11 @@ const initGenUIChat = async () => {
     await requestOpenAiApiKeyFromUser();
   }
 
-  setStatusIndicator(statusBar, 'Waiting for chat history...');
+  setStatusIndicator(statusBarElement, 'Waiting for chat history...');
   await waitUntilChatHistoryIsLoaded();
-  await generateHtmlOnChatResponse(iframe, chatProvider, statusBar);
-  addResponseCompletedListener(iframe);
-  window.addEventListener('message', handleMessage(iframe, statusBar));
+  await generateHtmlOnChatResponse(iframeElement, chatProvider, statusBarElement);
+  addResponseCompletedListener(iframeElement);
+  window.addEventListener('message', handleMessage(iframeElement, statusBarElement));
 };
 
 export const main = () => {

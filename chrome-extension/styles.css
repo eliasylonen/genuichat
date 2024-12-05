@@ -10,7 +10,7 @@
   flex-direction: column;
 }
 
-#genui-iframe {
+#genui-iframeElement {
   flex: 1;
   border: none;
 }

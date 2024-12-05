@@ -1,6 +1,6 @@
-export const loadHtml = async (iframe, html) => {
-  iframe.onload = () => {
-    const buttons = iframe.contentDocument.querySelectorAll('button');
+export const loadHtml = async (iframeElement, html) => {
+  iframeElement.onload = () => {
+    const buttons = iframeElement.contentDocument.querySelectorAll('button');
     buttons.forEach(button => {
       button.addEventListener('click', (e) => {
         window.parent.postMessage({
@@ -12,7 +12,7 @@ export const loadHtml = async (iframe, html) => {
     });
   };
 
-  iframe.contentDocument.open();
-  iframe.contentDocument.write(html);
-  iframe.contentDocument.close();
+  iframeElement.contentDocument.open();
+  iframeElement.contentDocument.write(html);
+  iframeElement.contentDocument.close();
 }; 
