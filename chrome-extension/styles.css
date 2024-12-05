@@ -29,7 +29,7 @@
 
 #genui-status-bar-text {
   margin: 0;
-  padding: 0;
+  padding: 0px 0px 0px 6px;
 }
 
 #genui-status-bar-settings-button {
@@ -41,7 +41,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
+  transition: background-color 150ms;
 }
 
 #genui-status-bar-settings-button:hover {
@@ -50,6 +50,7 @@
 
 #genui-status-bar-settings-button:active {
   background-color: #ddd;
+  transition: background-color 0ms;
 }
 
 #genui-status-bar-settings-button.active {
