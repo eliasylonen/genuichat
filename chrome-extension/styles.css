@@ -16,9 +16,39 @@
 }
 
 #genui-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: #f9f9f9;
   padding: 6px 8px;
   border-top: 1px solid #ddd;
   font-size: 12px;
   color: #666;
+}
+
+#genui-status-bar-text {
+  margin: 0;
+  padding: 0;
+}
+
+#genui-status-bar-settings-button {
+  cursor: pointer;
+  padding: 6px;
+  border: none;
+  background: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+#genui-status-bar-settings-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+#genui-status-bar-settings-button svg {
+  width: 16px;
+  height: 16px;
+  fill: #666;
 }

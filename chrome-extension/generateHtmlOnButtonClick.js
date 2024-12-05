@@ -13,9 +13,9 @@ const updateHtmlBasedOnButtonClick = async (buttonId, buttonText, domHtml) => { 
   return cleanHtml(rawUpdatedHtml);
 };
 
-export const generateHtmlOnButtonClick = async (iframeElement, statusBarElement, buttonId, buttonText, domHtml) => {
-  setStatusIndicator(statusBarElement, 'Generating initial HTML...');
+export const generateHtmlOnButtonClick = async (iframeElement, statusBarTextElement, buttonId, buttonText, domHtml) => {
+  setStatusIndicator(statusBarTextElement, 'Generating initial HTML...');
   const updatedHtml = await updateHtmlBasedOnButtonClick(buttonId, buttonText, domHtml);
   await loadHtml(iframeElement, updatedHtml);
-  setStatusIndicator(statusBarElement, 'Ready');
+  setStatusIndicator(statusBarTextElement, 'Ready');
 };

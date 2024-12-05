@@ -63,25 +63,25 @@ ${rawHtml}`;
   return styledHtml;
 }
 
-const generateHtmlOnChatResponse = async (iframeElement, chatProvider, statusBarElement) => {
-  setStatusIndicator(statusBarElement, 'Extracting relevant information...');
+const generateHtmlOnChatResponse = async (iframeElement, chatProvider, statusBarTextElement) => {
+  setStatusIndicator(statusBarTextElement, 'Extracting relevant information...');
   const relevantInformationMarkdown = await extractRelevantInformation(chatProvider);
 
   await loadHtml(iframeElement, relevantInformationMarkdown)
 
-  setStatusIndicator(statusBarElement, 'Generating initial HTML...');
+  setStatusIndicator(statusBarTextElement, 'Generating initial HTML...');
   const generatedHtml = await generateInitialHtml(relevantInformationMarkdown);
   await loadHtml(iframeElement, generatedHtml);
 
-  setStatusIndicator(statusBarElement, 'Adding interactive elements...');
+  setStatusIndicator(statusBarTextElement, 'Adding interactive elements...');
   const improvedHtml = await addHelpfulButtons(generatedHtml);
   await loadHtml(iframeElement, improvedHtml);
 
-  setStatusIndicator(statusBarElement, 'Generating styles...');
+  setStatusIndicator(statusBarTextElement, 'Generating styles...');
   const styledHtml = await generateStyledHtml(improvedHtml);
   await loadHtml(iframeElement, styledHtml);
 
-  setStatusIndicator(statusBarElement, 'Ready');
+  setStatusIndicator(statusBarTextElement, 'Ready');
 };
 
 export { generateHtmlOnChatResponse }; 
