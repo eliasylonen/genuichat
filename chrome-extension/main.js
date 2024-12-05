@@ -62,26 +62,26 @@ const chatProvider = (() => {
 })();
 
 const setupLayout = () => {
-  const genuiContainer = document.createElement('div');
-  genuiContainer.className = 'genui-container';
+  const genuiContainerElement = document.createElement('div');
+  genuiContainerElement.id = 'genui-container';
   
-  const iframe = document.createElement('iframe');
-  iframe.className = 'genui-iframe';
+  const iframeElement = document.createElement('iframe');
+  iframeElement.id = 'genui-iframe';
 
-  const statusBar = document.createElement('div');
-  statusBar.className = 'genui-status-bar';
-  setStatusIndicator(statusBar, 'Initializing...');
+  const statusBarElement = document.createElement('div');
+  statusBarElement.id = 'genui-status-bar';
+  setStatusIndicator(statusBarElement, 'Initializing...');
 
-  genuiContainer.appendChild(iframe);
-  genuiContainer.appendChild(statusBar);
-  document.body.appendChild(genuiContainer);
+  genuiContainerElement.appendChild(iframeElement);
+  genuiContainerElement.appendChild(statusBarElement);
+  document.body.appendChild(genuiContainerElement);
 
   const rootDivs = document.body.querySelectorAll('body > div');
   rootDivs.forEach(div => {
     div.style.maxWidth = '50%';
   });
 
-  return { iframe, statusBar };
+  return { genuiContainer: genuiContainerElement, iframe: iframeElement, statusBar: statusBarElement };
 };
 
 const getPlaceholderHtml = () => `
@@ -138,7 +138,7 @@ const requestOpenAiApiKeyFromUser = async () => {
 };
 
 const initGenUIChat = async () => {
-  const { iframe, statusBar } = setupLayout();
+  const { genuiContainer, iframe, statusBar } = setupLayout();
 
   try {
     getOpenAiApiKey();

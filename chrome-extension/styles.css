@@ -1,4 +1,4 @@
-.genui-container {
+#genui-container {
   width: 50%;
   height: 100vh;
   position: fixed;
@@ -10,12 +10,12 @@
   flex-direction: column;
 }
 
-.genui-iframe {
+#genui-iframe {
   flex: 1;
   border: none;
 }
 
-.genui-status-bar {
+#genui-status-bar {
   background: #f9f9f9;
   padding: 6px 8px;
   border-top: 1px solid #ddd;
