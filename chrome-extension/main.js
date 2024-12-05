@@ -3,8 +3,6 @@ import { getOpenAiApiKey } from './getOpenAiApiKey.js';
 import { setStatusIndicator } from './setStatusIndicator.js';
 import { generateHtmlOnButtonClick } from './generateHtmlOnButtonClick.js';
 
-console.log('Main script started');
-
 const chatGptProvider = {
   waitUntilChatHistoryIsLoaded: async () => new Promise((resolve) => {  
     const onMutation = (event) => {
@@ -31,7 +29,6 @@ const chatGptProvider = {
       if (!isLastChatGptResponseCompleted) return;
       const completedMessageId = getUniqueAcrossChatsLastMessageId();
       if (completedMessageIds.has(completedMessageId)) return;
-      console.log('Completed message id', completedMessageId);
       completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
       onLatestChatResponseCompletedOrLoaded();
     };
@@ -104,9 +101,7 @@ const handleMessage = (iframeElement, statusBarElement) => (event) => {
 }
 
 const waitUntilChatHistoryIsLoaded = async () => {
-  console.log('Waiting until chat history is loaded');
   await chatProvider.waitUntilChatHistoryIsLoaded();
-  console.log('Chat history loaded', document.querySelector('main article:last-of-type div[data-message-author-role="assistant"] > div > div'));
 }
 
 const requestOpenAiApiKeyFromUser = async () => {
@@ -135,6 +130,5 @@ const initGenUIChat = async () => {
 };
 
 export const main = () => {
-  console.log('Executing main function');
   initGenUIChat();
 };
