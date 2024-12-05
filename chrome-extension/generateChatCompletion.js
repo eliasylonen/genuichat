@@ -1,6 +1,6 @@
-import { getOpenAiApiKey } from './getApiKey.js';
+import { getOpenAiApiKey, getGeminiApiKey } from './getApiKey.js';
 
-export const generateChatCompletion = async (prompt) => {
+const generateChatCompletionOpenAi = async (prompt) => {
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -22,4 +22,36 @@ export const generateChatCompletion = async (prompt) => {
   const { content } = choices[0].message;
 
   return content;
+};
+
+const generateChatCompletionGemini = async (prompt) => {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${getGeminiApiKey()}`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{
+          text: prompt
+        }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const content = data.candidates[0].content.parts[0].text;
+
+  return content;
+};
+
+
+export const generateChatCompletion = async (prompt) => {
+  // return generateChatCompletionOpenAi(prompt);
+  return generateChatCompletionGemini(prompt);
 };

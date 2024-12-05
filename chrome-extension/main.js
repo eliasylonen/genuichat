@@ -168,8 +168,8 @@ const initGenUIChat = async () => {
 
   setStatusIndicator(statusBarTextElement, 'Waiting for chat history...');
   await waitUntilChatHistoryIsLoaded();
-  //await generateHtmlOnChatResponse(iframeElement, chatProvider, statusBarTextElement);
-  //registerOnLatestChatResponseCompletedOrLoaded(iframeElement);
+  await generateHtmlOnChatResponse(iframeElement, chatProvider, statusBarTextElement);
+  registerOnLatestChatResponseCompletedOrLoaded(iframeElement);
   window.addEventListener('message', onWindowMessage(iframeElement, statusBarTextElement));
 };
 
