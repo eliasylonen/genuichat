@@ -13,6 +13,7 @@ The extension splits ChatGPT interface into two parts:
 ## Roadmap
 - **Stage 1:** Generate helpful, high-quality UI with slow latency to prove there's value.
 - **Stage 2:** Increase speed.
+- **Stage 3:** Chrome Web Store release.
 
 ## Todo
 - Improve UI generation steps, especially the first one (planning what to show)
@@ -21,6 +22,7 @@ The extension splits ChatGPT interface into two parts:
 - Generate select boxes and other input elements
 - UI regeneration on new messages
 - Stretchable and hideable side panel with mobile support
+- Pregenerate button click UI states
 - Use Tailwind colors everywhere in `iframeStyles.css`
 - Test Tailwind in iframe using [Play CDN](https://tailwindcss.com/docs/installation/play-cdn)
 
