@@ -3,14 +3,14 @@ import { loadHtml } from './loadHtml.js';
 import { generateChatCompletion } from './generateChatCompletion.js';
 import { setStatusIndicator } from './setStatusIndicator.js';
 
-const extractRelevantInformation = async (chatProvider) => {
+const extractRelevantInformation = async (chatIntegration) => {
   const prompt = `Extract most relevant information from the following HTML.
 Shorten the text significantly, but keep tables and other data original.
 Respond in Markdown.
 
 HTML:
 
-${chatProvider.getLastMessageHTML()}`;
+${chatIntegration.getLastMessageHTML()}`;
 
   const relevantInformationMarkdown = await generateChatCompletion(prompt);
   return relevantInformationMarkdown;
@@ -50,9 +50,9 @@ ${rawHtml}`;
   return improvedHtml;
 }
 
-const generateHtmlOnChatResponse = async (iframeElement, chatProvider, statusBarTextElement) => {
+const generateHtmlOnChatResponse = async (iframeElement, chatIntegration, statusBarTextElement) => {
   setStatusIndicator(statusBarTextElement, 'Extracting relevant information...');
-  const relevantInformationMarkdown = await extractRelevantInformation(chatProvider);
+  const relevantInformationMarkdown = await extractRelevantInformation(chatIntegration);
 
   await loadHtml(iframeElement, relevantInformationMarkdown)
 

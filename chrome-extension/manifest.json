@@ -24,6 +24,7 @@
     "matches": ["*://*/*"],
     "resources": [
       "utils/cleanHtml.js",
+      "chatProvider.js",
       "generateChatCompletion.js",
       "generateHtmlOnButtonClick.js",
       "generateHtmlOnChatResponse.js",

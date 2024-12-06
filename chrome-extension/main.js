@@ -2,61 +2,7 @@ import { generateHtmlOnChatResponse } from './generateHtmlOnChatResponse.js';
 import { getOpenAiApiKey, getGeminiApiKey } from './getApiKey.js';
 import { setStatusIndicator } from './setStatusIndicator.js';
 import { generateHtmlOnButtonClick } from './generateHtmlOnButtonClick.js';
-
-const chatGptProvider = {
-  waitUntilChatHistoryIsLoaded: async () => new Promise((resolve) => {  
-    const onMutation = (event) => {
-      const isLoaded = !!document.querySelector('main article:last-of-type div[data-message-author-role="assistant"] > div > div');
-      if (!isLoaded) return;
-      mutationObserver.disconnect();
-      resolve();
-    };
-
-    const mutationObserver = new MutationObserver(onMutation);
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
-  }),
-  registerOnLatestChatResponseCompletedOrLoaded: (iframeElement, statusBarTextElement, onLatestChatResponseCompletedOrLoaded) => {
-    let completedMessageIds = new Set();
-
-    const getUniqueAcrossChatsLastMessageId = () => {
-      const messageId = document.querySelector('main article:last-of-type').getAttribute('data-testid');
-      const chatId = window.location.pathname.match(/\/c\/([0-9a-f-]+)/)?.[1];
-      return `chat-${chatId}-message-${messageId}`;
-    };
-
-    const onMutation = (event) => {
-      const isLastChatGptResponseCompleted = !!document.querySelector('main article:last-of-type [data-testid="copy-turn-action-button"]');
-      if (!isLastChatGptResponseCompleted) return;
-      const completedMessageId = getUniqueAcrossChatsLastMessageId();
-      if (completedMessageIds.has(completedMessageId)) return;
-      completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
-      onLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement);
-    };
-  
-    const mutationObserver = new MutationObserver(onMutation);
-
-    const articleElement = document.querySelector('main article');
-    const articlesContainer = articleElement?.parentElement;
-
-    if (!articlesContainer) throw new Error('No articles container found');
-
-    mutationObserver.observe(articlesContainer, { childList: true, subtree: true });
-  },
-  getLastMessageHTML: () => {
-    const lastMessageElement = document.querySelector('main article:last-of-type div[data-message-author-role="assistant"] > div > div')
-    if (!lastMessageElement) throw new Error('Last message not found');
-    return lastMessageElement?.innerHTML;
-  },
-}
-
-const chatProvider = (() => {
-  switch (window.location.hostname) {
-    case 'chatgpt.com':
-      return chatGptProvider;
-    default:
-      throw new Error('Unsupported chat provider');
-  }
-})();
+import { chatIntegration } from './chatProvider.js';
 
 const requestApiKey = async (apiKeyName, localStorageKey) => {
   const currentApiKey = localStorage.getItem(localStorageKey) ?? '';
@@ -123,11 +69,11 @@ const setupLayout = () => {
 };
 
 const onLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement) => async () => {
-  await generateHtmlOnChatResponse(iframeElement, chatProvider, statusBarTextElement);
+  await generateHtmlOnChatResponse(iframeElement, chatIntegration, statusBarTextElement);
 };
 
 const registerOnLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement) => {
-  chatProvider.registerOnLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, onLatestChatResponseCompletedOrLoaded);
+  chatIntegration.registerOnLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, onLatestChatResponseCompletedOrLoaded);
 };
 
 const handleIframeButtonClick = (iframeElement, statusBarTextElement) => async (event) => {
@@ -142,7 +88,7 @@ const onWindowMessage = (iframeElement, statusBarTextElement) => (event) => {
 }
 
 const waitUntilChatHistoryIsLoaded = async () => {
-  await chatProvider.waitUntilChatHistoryIsLoaded();
+  await chatIntegration.waitUntilChatHistoryIsLoaded();
 }
 
 const onSettingsButtonClick = () => {
@@ -168,7 +114,7 @@ const initGenUIChat = async () => {
 
   setStatusIndicator(statusBarTextElement, 'Waiting for chat history...');
   await waitUntilChatHistoryIsLoaded();
-  await generateHtmlOnChatResponse(iframeElement, chatProvider, statusBarTextElement);
+  await generateHtmlOnChatResponse(iframeElement, chatIntegration, statusBarTextElement);
   registerOnLatestChatResponseCompletedOrLoaded(iframeElement);
   window.addEventListener('message', onWindowMessage(iframeElement, statusBarTextElement));
 };
