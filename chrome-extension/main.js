@@ -68,23 +68,30 @@ const setupLayout = () => {
   return { genuiContainerElement, iframeElement, statusBarElement, statusBarTextElement, settingsButtonElement };
 };
 
-const onLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement) => async () => {
-  await generateHtmlOnChatResponse(iframeElement, chatIntegration, statusBarTextElement);
+const onLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement, state) => async () => {
+  await generateHtmlOnChatResponse(iframeElement, statusBarTextElement, state, chatIntegration);
 };
 
-const registerOnLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement) => {
-  chatIntegration.registerOnLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, onLatestChatResponseCompletedOrLoaded);
+const registerOnLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement, state) => {
+  chatIntegration.registerOnLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, state, onLatestChatResponseCompletedOrLoaded);
 };
 
-const handleIframeButtonClick = (iframeElement, statusBarTextElement) => async (event) => {
+const handleIframeButtonClick = async (iframeElement, statusBarTextElement, state, event) => {
+  state.isIframeButtonClickEnabled = false;
+  
+  const clickedButtonElement = iframeElement.contentDocument.getElementById(event.data.buttonId);
+  if (clickedButtonElement) clickedButtonElement.textContent = 'Loading...';
+  
   const domHtml = iframeElement.contentDocument.documentElement.outerHTML;
-  const html = await generateHtmlOnButtonClick(iframeElement, statusBarTextElement, event.data.buttonId, event.data.buttonText, domHtml);
+  const html = await generateHtmlOnButtonClick(iframeElement, statusBarTextElement, state, event.data.buttonId, event.data.buttonText, domHtml);
 };
 
-const onWindowMessage = (iframeElement, statusBarTextElement) => (event) => {
-  if (event.data.type === 'button-click') {
-    handleIframeButtonClick(iframeElement, statusBarTextElement)(event);
-  }
+const registerOnWindowMessage = (iframeElement, statusBarTextElement, state) => {
+  window.addEventListener('message', async (event) => {
+    if (event.data.type === 'button-click' && state.isIframeButtonClickEnabled) {
+      await handleIframeButtonClick(iframeElement, statusBarTextElement, state, event);
+    }
+  })
 }
 
 const waitUntilChatHistoryIsLoaded = async () => {
@@ -108,15 +115,19 @@ const initGenUIChat = async () => {
     settingsButtonElement
   } = setupLayout();
 
+  const state = {
+    isIframeButtonClickEnabled: true
+  }
+
   registerOnSettingsButtonClick(settingsButtonElement);
+  registerOnWindowMessage(iframeElement, statusBarTextElement, state);
 
   await requestMissingApiKeysFromUser();
 
   setStatusIndicator(statusBarTextElement, 'Waiting for chat history...');
   await waitUntilChatHistoryIsLoaded();
-  await generateHtmlOnChatResponse(iframeElement, chatIntegration, statusBarTextElement);
-  registerOnLatestChatResponseCompletedOrLoaded(iframeElement);
-  window.addEventListener('message', onWindowMessage(iframeElement, statusBarTextElement));
+  await generateHtmlOnChatResponse(iframeElement, statusBarTextElement, state, chatIntegration);
+  registerOnLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, state);
 };
 
 export const main = () => {

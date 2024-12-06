@@ -1,4 +1,4 @@
-export const loadHtml = async (iframeElement, html) => {
+export const loadHtml = async (iframeElement, state, html) => {
   iframeElement.onload = () => {
     const link = document.createElement('link');
     link.href = chrome.runtime.getURL('iframeStyles.css');
@@ -10,7 +10,6 @@ export const loadHtml = async (iframeElement, html) => {
 
     buttons.forEach(button => {
       button.addEventListener('click', (event) => {
-        event.target.textContent = 'Loading...';
         window.parent.postMessage({
           type: 'button-click',
           buttonId: event.target.id,
@@ -23,4 +22,6 @@ export const loadHtml = async (iframeElement, html) => {
   iframeElement.contentDocument.open();
   iframeElement.contentDocument.write(html);
   iframeElement.contentDocument.close();
+
+  state.isIframeButtonClickEnabled = true;
 };

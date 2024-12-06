@@ -11,7 +11,7 @@ const chatGptIntegration = {
     const mutationObserver = new MutationObserver(onMutation);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
   }),
-  registerOnLatestChatResponseCompletedOrLoaded: (iframeElement, statusBarTextElement, onLatestChatResponseCompletedOrLoaded) => {
+  registerOnLatestChatResponseCompletedOrLoaded: (iframeElement, statusBarTextElement, state, onLatestChatResponseCompletedOrLoaded) => {
     let completedMessageIds = new Set();
 
     const getUniqueAcrossChatsLastMessageId = () => {
@@ -26,7 +26,7 @@ const chatGptIntegration = {
       const completedMessageId = getUniqueAcrossChatsLastMessageId();
       if (completedMessageIds.has(completedMessageId)) return;
       completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
-      onLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement);
+      onLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, state);
     };
   
     const mutationObserver = new MutationObserver(onMutation);
