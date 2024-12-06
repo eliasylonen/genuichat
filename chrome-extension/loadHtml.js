@@ -9,11 +9,12 @@ export const loadHtml = async (iframeElement, html) => {
     const buttons = iframeElement.contentDocument.querySelectorAll('button');
 
     buttons.forEach(button => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener('click', (event) => {
+        event.target.textContent = 'Loading...';
         window.parent.postMessage({
           type: 'button-click',
-          buttonId: e.target.id,
-          buttonText: e.target.textContent
+          buttonId: event.target.id,
+          buttonText: event.target.textContent
         }, '*');
       });
     });

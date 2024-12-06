@@ -11,14 +11,12 @@ The extension splits ChatGPT interface into two parts:
 - Button clicks trigger complete UI regeneration
 
 ## Roadmap
-- **Stage 1:** Generate helpful, high-quality UI with slow latency to prove there's value.
+- **Stage 1:** Generate helpful UI with slow latency to prove there's value.
 - **Stage 2:** Increase speed.
-- **Stage 3:** Chrome Web Store release.
 
 ## Todo
 - Improve UI generation steps, especially the first one (planning what to show)
 - Max one in-flight generation process at a time
-- Button loading state
 - Generate select boxes and other input elements
 - UI regeneration on new messages
 - Stretchable and hideable side panel with mobile support
