@@ -50,19 +50,6 @@ ${rawHtml}`;
   return improvedHtml;
 }
 
-const generateStyledHtml = async (rawHtml) => {
-  const prompt = `Add sleek, minimalist, Stripe and Linear-inspired CSS styling to the following HTML.
-Reply only with HTML and CSS, nothing else.
-
-HTML:
-
-${rawHtml}`;
-
-  const rawStyledHtml = await generateChatCompletion(prompt);
-  const styledHtml = cleanHtml(rawStyledHtml);
-  return styledHtml;
-}
-
 const generateHtmlOnChatResponse = async (iframeElement, chatProvider, statusBarTextElement) => {
   setStatusIndicator(statusBarTextElement, 'Extracting relevant information...');
   const relevantInformationMarkdown = await extractRelevantInformation(chatProvider);
@@ -76,10 +63,6 @@ const generateHtmlOnChatResponse = async (iframeElement, chatProvider, statusBar
   setStatusIndicator(statusBarTextElement, 'Adding interactive elements...');
   const improvedHtml = await addHelpfulButtons(generatedHtml);
   await loadHtml(iframeElement, improvedHtml);
-
-  setStatusIndicator(statusBarTextElement, 'Generating styles...');
-  const styledHtml = await generateStyledHtml(improvedHtml);
-  await loadHtml(iframeElement, styledHtml);
 
   setStatusIndicator(statusBarTextElement, 'Ready');
 };

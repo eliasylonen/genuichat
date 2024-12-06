@@ -15,7 +15,7 @@ const chatGptProvider = {
     const mutationObserver = new MutationObserver(onMutation);
     mutationObserver.observe(document.body, { childList: true, subtree: true });
   }),
-  registerOnLatestChatResponseCompletedOrLoaded: (onLatestChatResponseCompletedOrLoaded) => {
+  registerOnLatestChatResponseCompletedOrLoaded: (iframeElement, statusBarTextElement, onLatestChatResponseCompletedOrLoaded) => {
     let completedMessageIds = new Set();
 
     const getUniqueAcrossChatsLastMessageId = () => {
@@ -30,7 +30,7 @@ const chatGptProvider = {
       const completedMessageId = getUniqueAcrossChatsLastMessageId();
       if (completedMessageIds.has(completedMessageId)) return;
       completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
-      onLatestChatResponseCompletedOrLoaded();
+      onLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement);
     };
   
     const mutationObserver = new MutationObserver(onMutation);
@@ -92,8 +92,8 @@ const setupLayout = () => {
   genuiContainerElement.id = 'genui-container';
   
   const iframeElement = document.createElement('iframe');
-  iframeElement.id = 'genui-iframeElement';
-
+  iframeElement.id = 'genui-iframe';
+  
   const statusBarElement = document.createElement('div');
   statusBarElement.id = 'genui-status-bar';
 
@@ -122,12 +122,12 @@ const setupLayout = () => {
   return { genuiContainerElement, iframeElement, statusBarElement, statusBarTextElement, settingsButtonElement };
 };
 
-const onLatestChatResponseCompletedOrLoaded = (iframeElement) => async () => {
-  await generateHtmlOnChatResponse(iframeElement, chatProvider);
+const onLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement) => async () => {
+  await generateHtmlOnChatResponse(iframeElement, chatProvider, statusBarTextElement);
 };
 
-const registerOnLatestChatResponseCompletedOrLoaded = (iframeElement) => {
-  chatProvider.registerOnLatestChatResponseCompletedOrLoaded(onLatestChatResponseCompletedOrLoaded(iframeElement));
+const registerOnLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement) => {
+  chatProvider.registerOnLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, onLatestChatResponseCompletedOrLoaded);
 };
 
 const handleIframeButtonClick = (iframeElement, statusBarTextElement) => async (event) => {
