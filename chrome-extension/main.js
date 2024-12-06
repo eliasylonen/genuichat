@@ -68,7 +68,7 @@ const setupLayout = () => {
   return { genuiContainerElement, iframeElement, statusBarElement, statusBarTextElement, settingsButtonElement };
 };
 
-const onLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement, state) => async () => {
+const onLatestChatResponseCompletedOrLoaded = async (iframeElement, statusBarTextElement, state) => {
   await generateHtmlOnChatResponse(iframeElement, statusBarTextElement, state, chatIntegration);
 };
 

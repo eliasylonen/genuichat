@@ -20,23 +20,22 @@ const chatGptIntegration = {
       return `chat-${chatId}-message-${messageId}`;
     };
 
-    const onMutation = (event) => {
+    const onMutation = async (event) => {
       const isLastChatGptResponseCompleted = !!document.querySelector('main article:last-of-type [data-testid="copy-turn-action-button"]');
       if (!isLastChatGptResponseCompleted) return;
       const completedMessageId = getUniqueAcrossChatsLastMessageId();
       if (completedMessageIds.has(completedMessageId)) return;
       completedMessageIds = new Set([...completedMessageIds, completedMessageId]);
-      onLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, state);
+      await onLatestChatResponseCompletedOrLoaded(iframeElement, statusBarTextElement, state);
     };
   
     const mutationObserver = new MutationObserver(onMutation);
 
-    const articleElement = document.querySelector('main article');
-    const articlesContainer = articleElement?.parentElement;
+    const mainElement = document.querySelector('main');
+    const chatContainerElement = mainElement?.parentElement;
+    if (!chatContainerElement) throw new Error('No chat container element found');
 
-    if (!articlesContainer) throw new Error('No articles container found');
-
-    mutationObserver.observe(articlesContainer, { childList: true, subtree: true });
+    mutationObserver.observe(chatContainerElement, { childList: true, subtree: true });
   },
   getLastMessageHTML: () => {
     const lastMessageElement = document.querySelector('main article:last-of-type div[data-message-author-role="assistant"] > div > div')
