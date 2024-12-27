@@ -50,8 +50,10 @@ const generateChatCompletionGemini = async (prompt) => {
   return content;
 };
 
-
-export const generateChatCompletion = async (prompt) => {
-  // return generateChatCompletionOpenAi(prompt);
-  return generateChatCompletionGemini(prompt);
+export const generateChatCompletion = async (state, prompt) => {
+  if (state.isGeneratingHtml) throw new MultipleInFlightGenerationsError();
+  state.isGeneratingHtml = true;
+  const content = await generateChatCompletionGemini(prompt);
+  state.isGeneratingHtml = false;
+  return content;
 };

@@ -69,7 +69,15 @@ const setupLayout = () => {
 };
 
 const onLatestChatResponseCompletedOrLoaded = async (iframeElement, statusBarTextElement, state) => {
-  await generateHtmlOnChatResponse(iframeElement, statusBarTextElement, state, chatIntegration);
+  try {
+    await generateHtmlOnChatResponse(iframeElement, statusBarTextElement, state, chatIntegration);
+  } catch (error) {
+    if (error instanceof MultipleInFlightGenerationsError) {
+      console.log('Terminate generation');
+      return;
+    }
+    throw error;
+  }
 };
 
 const registerOnLatestChatResponseCompletedOrLoaded = (iframeElement, statusBarTextElement, state) => {
@@ -116,7 +124,8 @@ const initGenUIChat = async () => {
   } = setupLayout();
 
   const state = {
-    isIframeButtonClickEnabled: true
+    isIframeButtonClickEnabled: true,
+    isGenerating: false,
   }
 
   registerOnSettingsButtonClick(settingsButtonElement);

@@ -25,6 +25,7 @@
     "resources": [
       "utils/cleanHtml.js",
       "chatProvider.js",
+      "errors.js",
       "generateChatCompletion.js",
       "generateHtmlOnButtonClick.js",
       "generateHtmlOnChatResponse.js",
